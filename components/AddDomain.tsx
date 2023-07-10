@@ -18,7 +18,7 @@ interface AddDomainProps {
 
 const AddDomain: React.FC<AddDomainProps> = ({ addNewDomain }) => {
   const [name, setDomainName] = useState<string>('');
-  const [daysToAlert, setDaysToAlert] = useState<number>(30);
+  const [daysToAlert, setDaysToAlert] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   const handleFormSubmit = (e: FormEvent) => {
@@ -28,7 +28,7 @@ const AddDomain: React.FC<AddDomainProps> = ({ addNewDomain }) => {
     // Validate and process form data here
     const formData = {
       name,
-      daysToAlert,
+      daysToAlert: parseInt(daysToAlert),
     };
 
     if (name && daysToAlert) {
@@ -38,6 +38,8 @@ const AddDomain: React.FC<AddDomainProps> = ({ addNewDomain }) => {
         .then((response) => {
           // Form submitted successfully
           addNewDomain(response.data as Domain);
+          setDomainName('');
+          setDaysToAlert('');
         })
         .catch((error: any) => {
           console.error(
@@ -60,25 +62,23 @@ const AddDomain: React.FC<AddDomainProps> = ({ addNewDomain }) => {
         className="w-full flex flex-col md:flex-row items-center justify-center md:justify-around p-2"
       >
         <div className="flex flex-row items-center justify-center pt-2 md:pt-0 md:px-0 md:w-[400px]">
-          <div className="font-bold flex items-center pr-2 w-[35%]">
-            Domain Name:
-          </div>
+          <div className="font-bold flex items-center pr-2">Domain Name:</div>
           <input
             type="text"
             value={name}
             onChange={(e) => setDomainName(e.target.value)}
-            className="border border-metal-300 p-2 w-[70%] rounded-md"
+            className="border border-metal-300 p-2 w-full rounded-md"
           />
         </div>
         <div className="flex flex-row h-full pt-2 md:pt-0 md:px-0 md:w-[300px]">
-          <div className="font-bold flex items-center w-[80%]">
+          <div className="font-bold flex items-center">
             Days to Alert Before Expiry:
           </div>
           <input
             type="number"
             value={daysToAlert}
-            onChange={(e) => setDaysToAlert(parseInt(e.target.value))}
-            className="border border-metal-300 p-2 w-[20%] rounded-md"
+            onChange={(e) => setDaysToAlert(e.target.value)}
+            className="border border-metal-300 p-2 w-full rounded-md"
           />
         </div>
         <button
