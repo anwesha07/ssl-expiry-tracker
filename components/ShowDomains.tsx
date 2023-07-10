@@ -1,7 +1,6 @@
 import React, { ReactElement } from 'react';
 import Image from 'next/image';
-import { Sd } from '@mui/icons-material';
-import { edgeServerAppPaths } from 'next/dist/build/webpack/plugins/pages-manifest-plugin';
+import EditIcon from '@mui/icons-material/Edit';
 
 type Domain = {
   _id: string;
@@ -11,10 +10,10 @@ type Domain = {
   daysToAlert: number;
 };
 
-const ShowDomains: React.FC<{ domains: Domain[] }> = ({ domains }) => {
-  // console.log(domains);
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
-  const getTotalNumberOfDays = (expiry, issueDate) => {
+const ShowDomains: React.FC<{ domains: Domain[] }> = ({ domains }) => {
+  const getTotalNumberOfDays = (expiry: string, issueDate: string) => {
     // Calculate the time difference in milliseconds
     const totalTimeDifference =
       new Date(expiry).getTime() - new Date(issueDate).getTime();
@@ -24,7 +23,7 @@ const ShowDomains: React.FC<{ domains: Domain[] }> = ({ domains }) => {
     );
     return totalNumberOfDays;
   };
-  const getExpiredDays = (issueDate) => {
+  const getExpiredDays = (issueDate: string) => {
     const currentDate = new Date();
     // Calculate the time difference in milliseconds
     const expiredTimeDiff =
@@ -32,6 +31,7 @@ const ShowDomains: React.FC<{ domains: Domain[] }> = ({ domains }) => {
     // Convert the time difference to days
     return Math.ceil(expiredTimeDiff / (1000 * 60 * 60 * 24));
   };
+
   const getStatus = (
     alertPeriod: number,
     expiry: string,
@@ -42,19 +42,19 @@ const ShowDomains: React.FC<{ domains: Domain[] }> = ({ domains }) => {
     const daysRemaining = totalNumberOfDays - totalNumberOfExpiredDays;
     if (daysRemaining <= 0)
       return (
-        <div className="bg-errorbg text-error w-[60px] flex justify-center items-center rounded-[100px] px-0.5">
+        <div className="bg-errorbg text-error w-full max-w-[60px] h-[20px] flex justify-center items-center rounded-full px-0.5 font-[500] text-xs">
           expired
         </div>
       );
     else if (daysRemaining <= alertPeriod)
       return (
-        <div className="bg-warningbg text-warning w-[60px] flex justify-center items-center rounded-[100px] px-0.5">
+        <div className="bg-warningbg text-warning w-full max-w-[60px] h-[20px] flex justify-center items-center rounded-full px-0.5 font-[500] text-xs">
           alert
         </div>
       );
     else
       return (
-        <div className="bg-safebg w-[60px] flex justify-center items-center text-safe rounded-[100px] px-0.5">
+        <div className="bg-safebg w-full max-w-[60px] h-[20px] flex justify-center items-center text-safe rounded-full px-0.5 font-[500] text-xs">
           safe
         </div>
       );
@@ -62,10 +62,10 @@ const ShowDomains: React.FC<{ domains: Domain[] }> = ({ domains }) => {
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    const formattedDate = date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: '2-digit',
+    const formattedDate = date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
     return formattedDate;
   };
@@ -82,11 +82,15 @@ const ShowDomains: React.FC<{ domains: Domain[] }> = ({ domains }) => {
     */
     const totalNumberOfDays = getTotalNumberOfDays(expiry, issueDate);
     const totalNumberOfExpiredDays = getExpiredDays(issueDate);
-    const covered = (totalNumberOfExpiredDays * 100) / totalNumberOfDays;
-    console.log({ totalNumberOfExpiredDays });
+    const covered = Math.ceil(
+      (totalNumberOfExpiredDays * 100) / totalNumberOfDays,
+    );
     return (
-      <div className="w-[60%] h-[10px] bg-progressbar rounded-lg">
-        <div className={`w-[${covered}%] h-[100%] bg-buttonColor rounded-lg`} />
+      <div className="w-[60%] h-[8px] bg-progressbar rounded-lg">
+        <div
+          style={{ width: `${covered}%` }}
+          className={`h-[100%] bg-buttonColor rounded-lg`}
+        />
       </div>
     );
   };
@@ -94,47 +98,59 @@ const ShowDomains: React.FC<{ domains: Domain[] }> = ({ domains }) => {
   return (
     <div className="w-full max-w-[900px] bg-white border border-metal m-auto rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.16)] flex flex-col">
       <div className="rounded-lg text-tableHeaderText text-xs font-[600] flex flex-row w-[100%] bg-tableHeader h-[45px]">
-        <div className=" py-2 px-4 w-[30%] flex justify-start items-center">
+        <div className=" py-2 px-4 w-[25%] flex justify-start items-center cursor-pointer">
           Domain
         </div>
-        <div className=" py-2 px-4 w-[15%] flex justify-start items-center">
+        <div className=" py-2 px-4 w-[12%] flex justify-start items-center cursor-pointer">
           Status
         </div>
-        <div className=" py-2 px-4 w-[15%] flex justify-start items-center">
-          Issue date
+        <div className=" py-2 px-4 w-[18%] flex justify-start items-center cursor-pointer">
+          Issue Date
         </div>
-        <div className=" py-2 px-4 w-[15%] flex justify-start items-center">
-          Expiry
+        <div className=" py-2 px-4 w-[20%] flex justify-start items-center cursor-pointer">
+          Expiry Date
         </div>
-        <div className=" py-2 px-4 w-[25%] flex justify-start items-center">
-          Days left
+        <div className=" py-2 px-4 w-[25%] flex justify-start items-center cursor-pointer">
+          Days to expiry
         </div>
       </div>
       {domains.map((d) => {
         return (
           <div
             key={d.name}
-            className="border border-metal-800 hover:shadow-md hover:bg-highlight font-medium text-sm
-            flex w-[100%] h-[60px]"
+            className="border border-metal-800 hover:shadow-md hover:bg-highlight font-[400] text-sm
+            flex w-[100%] min-h-[60px]"
           >
-            <div className=" py-2 px-4 w-[30%] flex justify-start items-center">
+            <div className=" py-2 px-4 w-[25%] flex justify-start items-center">
               <Image
                 src="/images/defaultimage.png" // Path to the image file relative to the "public" directory
                 alt="My Image"
                 width={30}
                 height={30}
-                className="rounded-[50%] border border-metal-800 bg-progressbar mr-2"
+                className="rounded-[50%] border border-metal-800 bg-progressbar mr-4"
               />
-              <div className="w-[300px] flex justify-start">{d.name}</div>
+              <div className="flex flex-col font-[500]">
+                <div>{capitalize(d.name.split('.')[0])}</div>
+                <div className="text-xs text-tableHeaderText">{d.name}</div>
+              </div>
             </div>
-            <div className=" py-2 px-4 w-[15%] flex justify-start items-center">
+            <div className=" py-2 px-4 w-[12%] flex justify-start items-center">
               {getStatus(d.daysToAlert, d.expiry, d.issueDate)}
             </div>
-            <div className=" py-2 px-4 w-[15%] flex justify-start items-center">
+            <div className=" py-2 px-4 w-[18%] flex justify-start items-center text-xs font-[500]">
               {formatDate(d.issueDate)}
             </div>
-            <div className=" py-2 px-4 w-[15%] flex justify-start items-center">
-              {formatDate(d.expiry)}
+            <div className=" py-2 px-4 w-[20%] flex flex-col justify-center font-[500]">
+              <div>{formatDate(d.expiry)}</div>
+              <div className="text-xs text-tableHeaderText">
+                <b>
+                  {`${getTotalNumberOfDays(
+                    d.expiry,
+                    new Date().toISOString(),
+                  )} `}
+                </b>
+                days to expire
+              </div>
             </div>
             <div className="py-2 px-4 w-[25%] flex justify-start items-center">
               {showProgress(d.expiry, d.issueDate)}
@@ -143,15 +159,9 @@ const ShowDomains: React.FC<{ domains: Domain[] }> = ({ domains }) => {
                 alt="Delete"
                 width={20}
                 height={20}
-                className="ml-4 cursor-pointer text-tableHeader"
+                className="ml-4 cursor-pointer"
               />
-              <Image
-                src="/images/edit.svg"
-                alt="Edit"
-                width={20}
-                height={20}
-                className="ml-2 cursor-pointer text-tableHeader"
-              />
+              <EditIcon fontSize="small" className="ml-3 cursor-pointer" />
             </div>
           </div>
         );
