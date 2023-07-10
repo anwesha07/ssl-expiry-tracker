@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import dbConnect from '../../lib/dbConnect';
-import { findDomainByName, saveDomain } from '../../models/Domain';
+import { findDomainByName, saveDomain, IDomain } from '../../models/Domain';
 import sslChecker from 'ssl-checker';
 
 (async function () {
@@ -13,12 +13,10 @@ export default async function submitForm(
 ) {
   if (req.method === 'POST') {
     try {
-      const { formData } = req.body;
-      console.log(formData);
+      const { formData }: { formData: IDomain } = req.body;
 
       // check the domain name in db
       const formDataByName = await findDomainByName(formData.name);
-      console.log(formDataByName);
       if (formDataByName) {
         res.status(409).json({ message: 'domain already exists' });
         return;
@@ -29,7 +27,6 @@ export default async function submitForm(
         method: 'GET',
         port: 443,
       });
-      console.log(info);
 
       formData.expiry = new Date(info.validTo);
       formData.issueDate = new Date(info.validFrom);

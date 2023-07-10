@@ -18,7 +18,6 @@ const HomePage: React.FC = () => {
     try {
       // api call to fetch data
       const response = await axios.get('/api/domains');
-      // console.log(response);
       setdomains(response.data);
       return response;
     } catch (error: any) {

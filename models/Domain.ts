@@ -30,15 +30,17 @@ const Domain =
   mongoose.models.Domain || mongoose.model<IDomain>('Domain', domainSchema);
 
 export const saveDomain = async (domainDetails: IDomain) => {
-  const result: IDomain = await Domain.create(domainDetails);
+  const result: mongoose.Model<IDomain> = await Domain.create(domainDetails);
   return result;
 };
 
-export const findDomainByName = async (name: string) => {
+export const findDomainByName = async (
+  name: string,
+): Promise<mongoose.Model<IDomain>> => {
   const result = await Domain.findOne({ name });
   return result;
 };
 
-export const fetchDomains = async () => {
-  return Domain.find();
+export const fetchDomains = async (): Promise<IDomain[]> => {
+  return Domain.find().lean();
 };

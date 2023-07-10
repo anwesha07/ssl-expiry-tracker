@@ -2,9 +2,12 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import dbConnect from '../../lib/dbConnect';
 import { fetchDomains } from '../../models/Domain';
 
-(async function () {
-  await dbConnect();
-})();
+// (async function () {
+//   await dbConnect();
+// })();
+
+dbConnect();
+
 export default async function submitForm(
   req: NextApiRequest,
   res: NextApiResponse,
