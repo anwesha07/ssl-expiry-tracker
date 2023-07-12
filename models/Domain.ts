@@ -41,6 +41,9 @@ export const findDomainByName = async (
   return result;
 };
 
-export const fetchDomains = async (): Promise<IDomain[]> => {
+export const fetchDomains = (): Promise<IDomain[]> => {
   return Domain.find().lean();
 };
+
+export const deleteDomainById = (id: string): Promise<IDomain | null> =>
+  Domain.findByIdAndDelete(id);

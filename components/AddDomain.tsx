@@ -1,6 +1,7 @@
 import axios from 'axios';
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
+import { toast } from 'react-toastify';
 
 type Domain = {
   _id: string;
@@ -21,6 +22,10 @@ const AddDomain: React.FC<AddDomainProps> = ({ addNewDomain }) => {
   const [daysToAlert, setDaysToAlert] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
+  useEffect(() => {
+    if (errorMessage) toast.error(errorMessage);
+  }, [errorMessage]);
+
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
@@ -34,7 +39,7 @@ const AddDomain: React.FC<AddDomainProps> = ({ addNewDomain }) => {
     if (name && daysToAlert) {
       // Make the API request
       axios
-        .post('/api/submitForm', { formData })
+        .post('/api/domains', { formData })
         .then((response) => {
           // Form submitted successfully
           addNewDomain(response.data as Domain);
@@ -62,21 +67,23 @@ const AddDomain: React.FC<AddDomainProps> = ({ addNewDomain }) => {
         className="w-full flex flex-col md:flex-row items-center justify-center md:justify-around p-2"
       >
         <div className="flex flex-row items-center justify-center pt-2 md:pt-0 md:px-0 md:w-[400px]">
-          <div className="font-bold flex items-center pr-2">Domain Name:</div>
+          <div className="font-bold flex items-center pr-2">Domain:</div>
           <input
             type="text"
             value={name}
+            placeholder='Something like "google.com"'
             onChange={(e) => setDomainName(e.target.value)}
             className="border border-metal-300 p-2 w-full rounded-md"
           />
         </div>
         <div className="flex flex-row h-full pt-2 md:pt-0 md:px-0 md:w-[300px]">
-          <div className="font-bold flex items-center">
-            Days to Alert Before Expiry:
+          <div className="font-bold flex items-center w-[140px]">
+            Alert Before:
           </div>
           <input
             type="number"
             value={daysToAlert}
+            placeholder="How about 30 days?"
             onChange={(e) => setDaysToAlert(e.target.value)}
             className="border border-metal-300 p-2 w-full rounded-md"
           />
@@ -89,7 +96,6 @@ const AddDomain: React.FC<AddDomainProps> = ({ addNewDomain }) => {
           Add Domain
         </button>
       </form>
-      <div className="text-error px-2">{errorMessage}</div>
     </div>
   );
 };
