@@ -6,6 +6,7 @@ import ShowDomains from '../components/ShowDomains';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EastIcon from '@mui/icons-material/East';
+import { User } from 'firebase/auth';
 import {
   signInWithPopup,
   GoogleAuthProvider,
@@ -23,7 +24,7 @@ type Domain = {
 };
 
 const HomePage: React.FC = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [domains, setdomains] = useState<Domain[]>([]);
 
   // attaching an event handler to observe the state change of auth when looged in lor logged out
@@ -114,7 +115,7 @@ const HomePage: React.FC = () => {
         <div className="text-6xl mb-4  ">SSL Expiry Tracker</div>
         <p className="text-xl text-tableHeaderText  leading-relaxed mb-2">
           {`Keep a track and stay alerted about all your domains, so next time
-          you will remember whent to update your certificate!`}
+          you will remember when to update your certificate!`}
         </p>
         <button
           onClick={loginUser}
