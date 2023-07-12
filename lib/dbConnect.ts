@@ -1,10 +1,10 @@
-import mongoose, { ConnectOptions, Mongoose } from "mongoose";
+import mongoose, { ConnectOptions, Mongoose } from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI as string;
 
 if (!MONGODB_URI) {
   throw new Error(
-    "Please define the MONGODB_URI environment variable inside .env.local"
+    'Please define the MONGODB_URI environment variable inside .env.local',
   );
 }
 
@@ -33,7 +33,7 @@ async function dbConnect(): Promise<Mongoose> {
 
   if (!cached.promise) {
     const opts: ConnectOptions = {
-      bufferCommands: false,
+      bufferCommands: true,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
