@@ -6,7 +6,10 @@ import ShowDomains from '../components/ShowDomains';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EastIcon from '@mui/icons-material/East';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { User } from 'firebase/auth';
+import { toast } from 'react-toastify';
+
 import {
   signInWithPopup,
   GoogleAuthProvider,
@@ -25,88 +28,102 @@ type Domain = {
 
 const HomePage: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [domains, setdomains] = useState<Domain[]>([]);
+  const [domains, setDomains] = useState<Domain[]>([]);
 
   // attaching an event handler to observe the state change of auth when looged in lor logged out
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => setUser(user));
+    onAuthStateChanged(auth, (user) => {
+      console.log(user);
+      setUser(user);
+    });
   }, []);
 
   const loginUser = () => {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        console.log(auth);
-        // The signed-in user info.
-        const user = result.user;
-        console.log({ user });
-        // setUser(user);
-      })
-      .catch((error) => {
-        setUser(null);
-        const errorDetails = {
-          errorCode: error.code,
-          errorMessage: error.message,
-          // The AuthCredential type that was used.
-          credential: GoogleAuthProvider.credentialFromError(error),
-        };
-        console.log(errorDetails);
-      });
+    signInWithPopup(auth, provider).catch((error) => {
+      setUser(null);
+      const errorDetails = {
+        errorCode: error.code,
+        errorMessage: error.message,
+        // The AuthCredential type that was used.
+        credential: GoogleAuthProvider.credentialFromError(error),
+      };
+      console.log(errorDetails);
+    });
   };
   const signout = () => {
-    signOut(auth)
-      .then(() => {
-        // Sign-out successful.
-        console.log(auth);
-        // setUser(null);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    signOut(auth).catch((error) => {
+      console.log(error);
+    });
   };
-  const fetchDomains = async () => {
+  const fetchDomains = async (url: string) => {
     try {
       // api call to fetch data
-      const response = await axios.get('/api/domains');
-      setdomains(response.data);
-      return response;
+      console.log(user);
+      const config = {
+        headers: { userId: user!.uid },
+      };
+      const response = await axios.get(url, config);
+      setDomains(response.data);
+      console.log(response.data);
+      return response.data;
     } catch (error: any) {
       throw new Error(error.message);
     }
   };
   const addDomain = (domain: Domain): void => {
-    setdomains((domains) => [...domains, domain]);
+    setDomains((domains) => [...domains, domain]);
   };
   const handleDelete = async (id: string): Promise<void> => {
     try {
-      await axios.delete(`/api/domains/${id}`);
-      setdomains((domains) => domains.filter((domain) => domain._id !== id));
+      if (!user) return;
+      const config = {
+        headers: { userId: user.uid },
+      };
+      await axios.delete(`/api/domains/${id}`, config);
+      setDomains((domains) => domains.filter((domain) => domain._id !== id));
     } catch (error: any) {
       console.log(error);
+      toast.error('Failed to delete domain!');
     }
   };
-  const { data, error, isLoading } = useSWR('/api', fetchDomains);
-  if (error) return;
+  const { error, isLoading } = useSWR(
+    () => (user ? '/api/domains' : null),
+    fetchDomains,
+  );
+  if (error) {
+    toast.error('Something went wrong!');
+    return;
+  }
   if (isLoading) return <div>Loading...</div>;
 
   return user ? (
-    <div>
+    <div className="flex flex-col min-h-full">
       <ToastContainer
         position="top-right"
         autoClose={5000}
         hideProgressBar
         theme="light"
       />
-      {/* Same as */}
-      <ToastContainer />
-      <AddDomain addNewDomain={addDomain} />
+      <AddDomain addNewDomain={addDomain} user={user} />
       {error ? <div>{error.message}</div> : null}
       {isLoading ? (
         <div>Loading...</div>
+      ) : domains.length === 0 ? (
+        <div className="flex justify-center items-center grow text-2xl text-tableHeaderText">
+          Enter domains to view here!
+        </div>
       ) : (
         <ShowDomains domains={domains} handleDelete={handleDelete} />
       )}
-      <div className="w-[100%] mt-[2] h-[50px]">
-        <button onClick={signout}>signout</button>
+      <div className="w-[100%] mt-[2] h-[50px] flex justify-end items-center px-4 py-1.5">
+        <button
+          type="button"
+          className="bg-buttonColor text-white px-4 py-2 rounded-md md:w-[150px] rounded font-medium text-xs flex justify-center items-center h-full gap-2"
+          onClick={signout}
+        >
+          <LogoutIcon fontSize="small" />
+          Sign out
+        </button>
       </div>
     </div>
   ) : (

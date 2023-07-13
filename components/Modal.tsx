@@ -20,9 +20,7 @@ const Modal: React.FC<ModalProps> = ({ onClose, children }) => {
   }, []);
 
   const handleClickOutside = (event: MouseEvent) => {
-    console.log(modalRef.current);
     if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-      console.log('clicked outside');
       onClose();
     }
   };

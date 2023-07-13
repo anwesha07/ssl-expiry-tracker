@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IDomain extends Document {
+  userId: string;
   name: string;
   expiry: Date;
   issueDate: Date;
@@ -24,6 +25,10 @@ const domainSchema = new Schema({
     type: Number,
     required: true,
   },
+  userId: {
+    type: String,
+    required: true,
+  },
 });
 
 const Domain =
@@ -34,16 +39,19 @@ export const saveDomain = async (domainDetails: IDomain) => {
   return result;
 };
 
-export const findDomainByName = async (
+export const findDomainByNameAndUserId = async (
   name: string,
+  userId: string,
 ): Promise<mongoose.Model<IDomain>> => {
-  const result = await Domain.findOne({ name });
+  const result = await Domain.findOne({ name, userId });
   return result;
 };
 
-export const fetchDomains = (): Promise<IDomain[]> => {
-  return Domain.find().lean();
+export const fetchDomainsByUserId = (id: string): Promise<IDomain[] | null> => {
+  return Domain.find({ userId: id }).lean();
 };
 
+export const getDomainById = (id: string): Promise<IDomain | null> =>
+  Domain.findById(id);
 export const deleteDomainById = (id: string): Promise<IDomain | null> =>
   Domain.findByIdAndDelete(id);

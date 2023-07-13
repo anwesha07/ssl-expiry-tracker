@@ -8,5 +8,12 @@
 @layer base {
   html {
     font-family: Ubuntu;
+    @apply h-full;
+  }
+  body {
+    @apply h-full;
+  }
+  #__next {
+    @apply h-full;
   }
 }

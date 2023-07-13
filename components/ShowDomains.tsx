@@ -178,7 +178,7 @@ const ShowDomains: React.FC<{
           domain={deleteDomainModal}
         />
       )}
-      <div className="w-full max-w-[900px] mx-auto">
+      <div className="w-full max-w-[900px] mx-auto grow">
         <div className="flex gap-2 md:gap-4 mb-6 px-4">
           <div className="h-[100px] w-full border border-metal-800 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.1)] px-4 py-2">
             <div className="text-tableHeaderText font-[600] text-[0.75rem] mt-2 flex justify-start">
@@ -222,7 +222,7 @@ const ShowDomains: React.FC<{
           <div className="w-full hidden md:block"></div>
           <div className="w-full hidden md:block"></div>
         </div>
-        <div className="bg-white rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.16)] flex flex-col">
+        <div className="bg-white rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.16)] flex flex-col mb-4">
           <div className="rounded-t-lg text-tableHeaderText flex flex-row w-[100%] border border-metal-800 bg-tableHeader h-[45px]">
             <div
               className={`py-2 px-4 w-[25%] flex justify-start items-center cursor-pointer font-[600] text-[0.75rem]`}

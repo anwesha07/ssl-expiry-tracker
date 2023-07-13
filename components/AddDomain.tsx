@@ -1,5 +1,6 @@
 import axios from 'axios';
-import React, { FormEvent, useEffect, useState } from 'react';
+import React, { FormEvent, useState } from 'react';
+import { User } from 'firebase/auth';
 import AddIcon from '@mui/icons-material/Add';
 import { toast } from 'react-toastify';
 
@@ -15,20 +16,15 @@ type FunctionPropType = (domain: Domain) => void;
 
 interface AddDomainProps {
   addNewDomain: FunctionPropType;
+  user: User;
 }
 
-const AddDomain: React.FC<AddDomainProps> = ({ addNewDomain }) => {
+const AddDomain: React.FC<AddDomainProps> = ({ addNewDomain, user }) => {
   const [name, setDomainName] = useState<string>('');
   const [daysToAlert, setDaysToAlert] = useState<string>('');
-  const [errorMessage, setErrorMessage] = useState<string>('');
-
-  useEffect(() => {
-    if (errorMessage) toast.error(errorMessage);
-  }, [errorMessage]);
 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
-    setErrorMessage('');
 
     // Validate and process form data here
     const formData = {
@@ -36,10 +32,18 @@ const AddDomain: React.FC<AddDomainProps> = ({ addNewDomain }) => {
       daysToAlert: parseInt(daysToAlert),
     };
 
+    if (formData.daysToAlert <= 0) {
+      toast.error('Please enter a valid count of days!');
+      return;
+    }
+
     if (name && daysToAlert) {
+      const config = {
+        headers: { userId: user.uid },
+      };
       // Make the API request
       axios
-        .post('/api/domains', { formData })
+        .post(`/api/domains`, { formData }, config)
         .then((response) => {
           // Form submitted successfully
           addNewDomain(response.data as Domain);
@@ -52,11 +56,13 @@ const AddDomain: React.FC<AddDomainProps> = ({ addNewDomain }) => {
             error.response.data.message,
           );
           if (error.response.status === 409)
-            setErrorMessage(error.response.data.message);
-          else setErrorMessage('An error occurred while submitting the form');
+            toast.error(error.response.data.message);
+          else if (error.response.status === 400)
+            toast.error('Please provide a valid input!');
+          else toast.error('Check the domain!');
         });
     } else {
-      setErrorMessage('Fields are mandatory!');
+      toast.error('Fields are mandatory!');
     }
   };
 
@@ -64,7 +70,7 @@ const AddDomain: React.FC<AddDomainProps> = ({ addNewDomain }) => {
     <div className="py-4 px-0 flex flex-col item-center w-full max-w-[900px] m-auto text-darktext text-sm">
       <form
         onSubmit={handleFormSubmit}
-        className="w-full flex flex-col md:flex-row items-center justify-center md:justify-around p-2"
+        className="w-full flex flex-col md:flex-row items-center justify-center md:justify-between p-2"
       >
         <div className="flex flex-row items-center justify-center pt-2 md:pt-0 md:px-0 md:w-[400px]">
           <div className="font-bold flex items-center pr-2">Domain:</div>
